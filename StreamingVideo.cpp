@@ -1,25 +1,25 @@
-#include <iostream>   // Para imprimir en consola (cout)
-#include <deque>      // Estructura de datos tipo cola doble (ventana deslizante)
-#include <cstdlib>    // Para rand() y srand()
-#include <ctime>      // Para inicializar la semilla de rand()
-#include <thread>     // Para simular el tiempo real con sleep
-#include <chrono>     // Para medir tiempos (milisegundos)
+#include <iostream>   
+#include <deque> // Libreria para manejar el buffer como una cola, ya que sirve para manejar datos por los extremos de una "fila"
+#include <cstdlib>    // Libreria para generar numeros aleatorios
+#include <ctime>      // Libreria para que los numeros aleatorios cambien cada vez que ejecutas.
+#include <thread>     // Para hacer pausas en el programa simulando el tiempo real
+#include <chrono>     // Para manejar esas pausas en milisegundos
 
 using namespace std;
 
 int main() {
-    srand(time(nullptr)); // Semilla para generar numeros aleatorios diferentes cada ejecucion
+    srand(time(nullptr)); // Para que los cortes de conexion sean aleatorios cada vez
 
-    //CONFIGURACION DE LA SIMULACION
-    const int WINDOW_SIZE = 5; // Capacidad maxima del buffer (ventana deslizante)
+    //CONFIGURACION
+    const int WINDOW_SIZE = 5; // Maximo de datos que el buffer puede guardar (ventana deslizante)
     const int MIN_BUFFER = 3; // Minimo de chunks necesarios para reproducir sin pausas
-    const int TOTAL_CHUNKS = 30; // Total de datos que se van a simular
-    const int FPS_DELAY = 200; // Retraso en milisegundos por frame (5 fps aprox)
+    const int TOTAL_CHUNKS = 30; // Cuantos chunks se enviaran
+    const int FPS_DELAY = 200; // Tiempo entre frames (200 ms = aprox 5/s)
 
-    //VARIABLES PRINCIPALES
+    //VARIABLES
     deque<int> buffer; // Cola donde se almacenan los chunks listos para reproducir
     bool online = true; // Estado de la conexion
-    bool reproduciendo = false; // Indica si el "player" esta reproduciendo
+    bool reproduciendo = false; // Indica si el video se esta reproduciendo o esta en pausa
     int nextChunk = 1; // Numero del siguiente chunk que llegara
     int reproducidos = 0; // Cuantos chunks se han reproducido
     int tiempoDesconexion = 0; // Tiempo restante de la desconexion simulada
@@ -29,10 +29,10 @@ int main() {
     cout << "-------------------------------------------\n\n";
 
     // CICLO PRINCIPAL
-    // Continua mientras haya datos por recibir o chunks pendientes en el buffer
+    // Corre mientras sigan llegando o reproduciendose datos
     while (nextChunk <= TOTAL_CHUNKS || !buffer.empty() || reproduciendo) {
 
-        // 1. Simular perdida de conexion aleatoria
+        // 1. Simucion de perdida de conexion aleatoria
         if (online && rand() % 20 == 0) {
             online = false;
             tiempoDesconexion = 3; // Se corta por 3 ciclos
@@ -54,7 +54,7 @@ int main() {
 
         // 3. Llegada de nuevos datos (solo si hay conexion)
         if (online && buffer.size() < WINDOW_SIZE && nextChunk <= TOTAL_CHUNKS) {
-            buffer.push_back(nextChunk);
+            buffer.push_back(nextChunk); //llega un nuevo trozo del video
             cout << "[RED] Chunk " << nextChunk << " recibido. Buffer: "
                  << buffer.size() << "/" << WINDOW_SIZE << "\n";
             nextChunk++;
@@ -103,6 +103,7 @@ int main() {
 
     return 0;
 }
+
 
 
 
